@@ -1,0 +1,146 @@
+(1, 'Laptop', 1000, 'Supplier A', 'Brand X', '2021-01-10', '2024-01-10'), (2, 'Smartphone', 800, 'Supplier B', 'Brand Y', '2021-02-15', '2024-02-15'), (3, 'Tablet', 500, 'Supplier C', 'Brand Z', '2021-03-20', '2024-03-20'),
+(4, 'Smartwatch', 200, 'Supplier D', 'Brand X', '2021-04-05', '2024-04-05'), (5, 'Headphones', 150, 'Supplier E', 'Brand Y', '2021-05-10', '2024-05-10');
+select * from Item;
+
+INSERT INTO Location (Location_Key, City, Street, State, Country) VALUES
+
+(1, 'New York', '5th Avenue', 'NY', 'USA'),
+
+(2, 'Los Angeles', 'Sunset Blvd', 'CA', 'USA'),
+
+(3, 'Chicago', 'Michigan Ave', 'IL', 'USA'),
+
+(4, 'Houston', 'Main St', 'TX', 'USA'),
+
+(5, 'Phoenix', 'Central Ave', 'AZ', 'USA');
+select * from Location;
+INSERT INTO Sales (Time_Key, Item_Key, Location_Key, Branch_Key, Units_Sold,
+
+Dollars_Sold) VALUES
+
+(1, 1, 1, 1, 10, 10000),
+
+(2, 2, 1, 1, 5, 4000),
+
+(3, 1, 2, 2, 3, 3000),
+
+(4, 3, 2, 2, 7, 3500),
+
+(5, 1, 3, 3, 2, 2000),
+
+(6, 2, 3, 3, 4, 3200),
+
+(7, 4, 4, 4, 6, 1200),
+
+(8, 5, 5, 5, 1, 150),
+
+(9, 3, 1, 2, 8, 4000),
+
+(10, 1, 4, 1, 5, 5000);
+
+select * from Sales;
+
+
+#Roll Up
+
+SELECT Year, SUM(Units_Sold), SUM(Dollars_Sold)
+
+FROM Sales, Time
+
+GROUP BY Year;
+
+
+#Drill Down
+
+SELECT Week, SUM(Units_Sold), SUM(Dollars_Sold)
+
+FROM Sales, Time
+
+WHERE Month = 'April'
+
+GROUP BY Week;
+
+#Dice
+
+SELECT Branch_Name, City, SUM(Units_Sold), SUM(Dollars_Sold)
+
+
+#Drill Down
+
+SELECT Week, SUM(Units_Sold), SUM(Dollars_Sold)
+
+FROM Sales, Time
+
+WHERE Month = 'April'
+
+GROUP BY Week;
+
+
+
+
+#Dice
+
+SELECT Branch_Name, City, SUM(Units_Sold), SUM(Dollars_Sold)
+JOIN Location ON Sales.Location_Key =
+
+Location.Location_Key
+
+WHERE Branch_Name = 'Main Branch' AND City = 'New York'
+
+GROUP BY Branch_Name, City;
+
+
+#Slice
+
+
+SELECT Branch_Name, SUM(Units_Sold),
+
+SUM(Dollars_Sold)
+
+FROM Sales
+
+JOIN Branch ON Sales.Branch_Key = Branch.Branch_Key
+
+WHERE Branch_Name = 'Main Branch'
+
+GROUP BY Branch_Name;
+
+
+#Pivot
+
+SELECT
+
+b.Branch_Name,
+
+SUM(CASE WHEN i.Item_Name = 'Laptop' THEN s.Dollars_Sold ELSE 0 END) AS Laptop_Sales,
+
+SUM(CASE WHEN i.Item_Name = 'Smartphone' THEN s.Dollars_Sold ELSE 0 END) AS Smartphone_Sales,
+
+SUM(CASE WHEN i.Item_Name = 'Tablet' THEN
+s.Dollars_Sold ELSE 0 END) AS
+
+Tablet_Sales
+
+FROM
+
+Sales s
+
+JOIN
+
+Item i ON s.Item_Key = i.Item_Key
+
+JOIN
+
+Branch b ON s.Branch_Key = b.Branch_Key
+
+JOIN
+
+Time t ON s.Time_Key = t.Time_Key
+
+WHERE
+
+t.Year = 2022 -- Specify the year
+
+GROUP BY
+
+b.Branch_Name;
